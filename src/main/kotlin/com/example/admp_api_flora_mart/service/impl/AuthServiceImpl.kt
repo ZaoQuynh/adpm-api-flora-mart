@@ -13,10 +13,10 @@ import com.example.admp_api_flora_mart.reponsitory.UserRepository
 import com.example.admp_api_flora_mart.service.AuthService
 import com.example.admp_api_flora_mart.service.RefreshTokenService
 import com.example.admp_api_flora_mart.service.TokenService
-import com.example.admp_api_flora_mart.service.UserService
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.naming.AuthenticationException
@@ -29,7 +29,8 @@ class AuthServiceImpl(
     private val jwtProperties: JwtProperties,
     private val refreshTokenService: RefreshTokenService,
     private val userRepository: UserRepository,
-    private val userMapper: UserMapper
+    private val userMapper: UserMapper,
+    private val passwordEncoder: PasswordEncoder
 ): AuthService {
 
     override fun authenticate(email: String, password: String): AuthResponse {
@@ -50,17 +51,11 @@ class AuthServiceImpl(
 
             AuthResponse(
                 accessToken = accessToken,
-                refreshToken = refreshToken,
-                role = userDTO.role?:ERole.CUSTOMER,
-                status = userDTO.status
+                user = userDTO
             )
         } catch (e: Exception) {
             throw AuthenticationException("Authentication failed: ${e.message}")
         }
-    }
-
-    override fun register(registerRequest: RegisterRequest): UserDTO {
-        TODO("Not yet implemented")
     }
 
     override fun getUserByToken(jwt: String): UserDTO {
@@ -77,25 +72,57 @@ class AuthServiceImpl(
         return userMapper.toDto(user)
     }
 
-//    override fun register(registerRequest: RegisterRequest): UserDTO {
-//        if (userRepository.existsByEmail(registerRequest.email!!)) {
-//            throw AuthenticationException("Email already exists: ${registerRequest.email}")
-//        }
-//
-//        val user = User(
-//            fullName = registerRequest.fullName,
-//            email = registerRequest.email,
-//            username = registerRequest.username,
-//            password = passwordEncoder.encode(registerRequest.password),
-//            tier = EUserTier.BRONZE,
-//            points = 0,
-//            status = EUserStatus.PENDING,
-//            role = ERole.CUSTOMER
-//        )
-//
-//        val savedUser = userRepository.save(user)
-//        return userMapper.toDto(savedUser)
-//    }
+    override fun verifyByEmail(email: String): UserDTO? {
+        println("Verifying user with email: $email")
+        val user = userRepository.findByEmail(email)
+            .orElseThrow { AuthenticationException("User not found for email: $email.") }
+
+        println("User found: $user")
+
+        user.status = EUserStatus.ACTIVE
+        val verifiedUser = userRepository.save(user)
+        return userMapper.toDto(verifiedUser)
+    }
+
+    override fun isEmailExist(email: String): Boolean {
+        return userRepository.existsByEmail(email);
+    }
+
+    override fun isUsernameExist(username: String): Boolean {
+        return userRepository.existsByUsername(username);
+    }
+
+    override fun resetPassword(email: String, newPassword: String): UserDTO? {
+        println("Reset password with email: $email")
+        val user = userRepository.findByEmail(email)
+            .orElseThrow { AuthenticationException("User not found for email: $email.") }
+
+        println("User found: $user")
+
+        user.password = passwordEncoder.encode(newPassword)
+        val verifiedUser = userRepository.save(user)
+        return userMapper.toDto(verifiedUser)
+    }
+
+    override fun register(registerRequest: RegisterRequest): UserDTO {
+        if (userRepository.existsByEmail(registerRequest.email!!)) {
+            throw AuthenticationException("Email already exists: ${registerRequest.email}")
+        }
+
+        val user = User(
+            fullName = registerRequest.fullName,
+            email = registerRequest.email,
+            username = registerRequest.username,
+            password = passwordEncoder.encode(registerRequest.password),
+            tier = EUserTier.BRONZE,
+            points = 0,
+            status = EUserStatus.PENDING,
+            role = ERole.CUSTOMER
+        )
+
+        val savedUser = userRepository.save(user)
+        return userMapper.toDto(savedUser)
+    }
 
     private fun generateRefreshToken(user: UserDetails) = tokenService.generate(
         userDetails = user,

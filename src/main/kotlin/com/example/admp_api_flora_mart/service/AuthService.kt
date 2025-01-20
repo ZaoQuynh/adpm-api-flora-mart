@@ -8,4 +8,8 @@ interface AuthService {
     fun authenticate(email: String, password: String): AuthResponse
     fun register(registerRequest: RegisterRequest): UserDTO
     fun getUserByToken(jwt: String): UserDTO
+    fun verifyByEmail(email: String): UserDTO?
+    fun isEmailExist(email: String): Boolean
+    fun isUsernameExist(username: String): Boolean
+    fun resetPassword(email: String, newPassword: String): UserDTO?
 }
