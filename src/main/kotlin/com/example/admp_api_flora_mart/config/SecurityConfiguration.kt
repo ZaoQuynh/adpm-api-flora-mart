@@ -29,10 +29,10 @@ class SecurityConfiguration(
                     .permitAll()
                     .requestMatchers("/api/v1/auth/logout")
                     .authenticated()
-//                    .requestMatchers("/api/v1/user**")
-//                    .hasRole("ADMIN")
-//                    .anyRequest()
-//                    .fullyAuthenticated()
+                    .requestMatchers("/api/v1/user**")
+                    .hasRole("ADMIN")
+                    .anyRequest()
+                    .fullyAuthenticated()
             }
             .sessionManagement {
                 it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)

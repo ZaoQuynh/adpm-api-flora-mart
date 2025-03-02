@@ -15,7 +15,7 @@ import org.springframework.security.authentication.AuthenticationProvider
 
 @Configuration
 @EnableConfigurationProperties(JwtProperties::class)
-class Configuration {
+class AppConfig {
 
     @Bean
     fun userDetailsService(userRepository: UserRepository): UserDetailsService =

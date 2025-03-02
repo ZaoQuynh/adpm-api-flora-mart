@@ -20,6 +20,10 @@ data class User(
     var role: ERole?= null,
     var tokenRefresh: String?= null,
     var avatar: String?= null,
+
+
+    @OneToMany(mappedBy = "customer", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    var reviews: MutableList<Review> = mutableListOf()
 )
 
 enum class ERole {
