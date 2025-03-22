@@ -45,6 +45,9 @@ dependencies {
 
 	// Send Email
 	implementation("org.springframework.boot:spring-boot-starter-mail")
+
+	//Quartz
+	implementation("org.springframework.boot:spring-boot-starter-quartz")
 }
 
 kotlin {
