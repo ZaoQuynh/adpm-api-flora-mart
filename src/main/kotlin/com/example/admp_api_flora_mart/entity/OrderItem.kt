@@ -14,9 +14,11 @@ data class OrderItem(
     var discounted: Double?= 0.0,
     var qty: Int?= 0,
     var currentPrice: Double?= 0.0,
-    var isReviewed: Boolean,
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
     var order: Order? = null,
+
+    @OneToOne(mappedBy = "orderItem", cascade = [CascadeType.ALL])
+    var review: Review? = null
 )

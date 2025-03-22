@@ -11,5 +11,6 @@ data class VoucherDTO (
     var endDate: LocalDateTime?= null,
     var type: VoucherTypeDTO?= null,
     var description: String?= null,
-    var minOrderAmount: Double?= 0.0
+    var minOrderAmount: Double?= null,
+    var maxDiscount: Double?= null
 )

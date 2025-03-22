@@ -112,6 +112,7 @@ class AuthServiceImpl(
         val user = User(
             fullName = registerRequest.fullName,
             email = registerRequest.email,
+            phoneNumber = registerRequest.phoneNumber,
             username = registerRequest.username,
             password = passwordEncoder.encode(registerRequest.password),
             tier = EUserTier.BRONZE,

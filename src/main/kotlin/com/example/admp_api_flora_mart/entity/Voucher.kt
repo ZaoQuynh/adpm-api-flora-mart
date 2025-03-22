@@ -18,5 +18,6 @@ data class Voucher(
     @JoinColumn(name = "voucher_type_id", nullable = false)
     var type: VoucherType?= null,
     var description: String?= null,
-    var minOrderAmount: Double?= 0.0
+    var minOrderAmount: Double?= null,
+    var maxDiscount: Double?=null
 )
