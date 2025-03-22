@@ -1,8 +1,13 @@
 package com.example.admp_api_flora_mart.service
 
-import com.example.admp_api_flora_mart.controller.orderItem.request.AddToCartRequest
 import com.example.admp_api_flora_mart.dto.OrderDTO
 
 interface OrderService {
-    fun addToCart(request: AddToCartRequest): OrderDTO
+    fun getOrders(): List<OrderDTO>
+    fun add(orderDTO: OrderDTO): OrderDTO
+    fun getOrdersByUser(email: String): List<OrderDTO>
+    fun updateOrderStatus(orderId: Long): OrderDTO
+    fun cancel(orderId: Long): OrderDTO
+    fun receive(orderId: Long): OrderDTO
+    fun getById(orderId: Long): OrderDTO
 }

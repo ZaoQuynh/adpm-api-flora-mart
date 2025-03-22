@@ -17,7 +17,8 @@ data class Review (
     var comment: String?= null,
     var feedback: String?= null,
     var date: LocalDateTime?=null,
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    var product: Product? = null
+
+    @OneToOne
+    @JoinColumn(name = "order_item_id", unique = true)
+    var orderItem: OrderItem? = null
 )

@@ -4,7 +4,7 @@ import jakarta.persistence.*
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "order")
+@Table(name = "`order`")
 data class Order (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,5 +33,5 @@ data class Order (
 )
 
 enum class EOrderStatus{
-    NEW, CONFIRMED, PREPARING, SHIPPING, DELIVERED, CANCELED
+    NEW, CONFIRMED, PREPARING, SHIPPING, SHIPPED, DELIVERED, CANCELED
 }
