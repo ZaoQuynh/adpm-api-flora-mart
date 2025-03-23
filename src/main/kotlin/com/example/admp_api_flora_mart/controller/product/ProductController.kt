@@ -11,12 +11,13 @@ class ProductController(private val productService: ProductService) {
     @GetMapping
     fun getProducts(): ResponseEntity<Any>{
         return try {
-            val attributes = productService.getProducts();
-            ResponseEntity.ok(attributes)
+            val products = productService.getProducts();
+            ResponseEntity.ok(products)
         } catch (ex: Exception){
             ResponseEntity.badRequest().body(mapOf("error" to ex.message))
         }
     }
+
     @PostMapping
     fun addProduct(@RequestBody product: ProductDTO): ResponseEntity<Any> {
         return try {
