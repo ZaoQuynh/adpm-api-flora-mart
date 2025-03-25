@@ -16,8 +16,12 @@ data class OrderItem(
     var currentPrice: Double?= 0.0,
 
     @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "order_id", nullable = true)
     var order: Order? = null,
+
+    @ManyToOne
+    @JoinColumn(name = "cart_id", nullable = true)
+    var cart: Cart? = null,
 
     @OneToOne(mappedBy = "orderItem", cascade = [CascadeType.ALL])
     var review: Review? = null
