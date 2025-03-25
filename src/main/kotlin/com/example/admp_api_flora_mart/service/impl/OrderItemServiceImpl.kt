@@ -1,5 +1,6 @@
 package com.example.admp_api_flora_mart.service.impl
 
+import com.example.admp_api_flora_mart.controller.orderItem.request.AddToCartRequest
 import com.example.admp_api_flora_mart.dto.CartDTO
 import com.example.admp_api_flora_mart.dto.OrderItemDTO
 import com.example.admp_api_flora_mart.entity.OrderItem
@@ -38,22 +39,22 @@ class OrderItemServiceImpl(
     }
 
     @Transactional
-    override fun addToCart(orderItemDTO: OrderItemDTO, cartDTO: CartDTO): OrderItemDTO {
-        val productId = orderItemDTO.product?.id
+    override fun addToCart(request: AddToCartRequest): OrderItemDTO {
+        val productId = request.productDTO.id
             ?: throw RuntimeException("Product ID is required")
         val product = productRepository.findById(productId)
             .orElseThrow { RuntimeException("Product not found with ID: $productId") }
 
-        val cart = cartDTO.id?.let {
+        val cart = request.cartDTO.id?.let {
             cartRepository.findById(it).orElseThrow { RuntimeException("Cart not found") }
         } ?: throw RuntimeException("Cart ID is null")
 
         val existingOrderItem = cart.orderItems.find { it.product?.id == productId }
 
         return if (existingOrderItem != null) {
-            existingOrderItem.qty = (existingOrderItem.qty ?: 0) + (orderItemDTO.qty ?: 1)
-            existingOrderItem.currentPrice = orderItemDTO.currentPrice
-            existingOrderItem.discounted = orderItemDTO.discounted
+            existingOrderItem.qty = (existingOrderItem.qty ?: 0) + 1
+            existingOrderItem.currentPrice = product.price
+            existingOrderItem.discounted = product.discount
 
             val updatedOrderItem = orderItemRepository.save(existingOrderItem)
 
@@ -67,9 +68,9 @@ class OrderItemServiceImpl(
         } else {
             val newOrderItem = OrderItem(
                 product = product,
-                discounted = orderItemDTO.discounted,
-                qty = orderItemDTO.qty ?: 1,
-                currentPrice = orderItemDTO.currentPrice,
+                discounted = product.discount,
+                qty = 1,
+                currentPrice = product.price,
                 cart = cart
             )
 
