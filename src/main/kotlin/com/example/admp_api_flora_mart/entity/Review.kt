@@ -1,7 +1,6 @@
 package com.example.admp_api_flora_mart.entity
 
 import jakarta.persistence.*
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
