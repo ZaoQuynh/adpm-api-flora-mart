@@ -25,7 +25,4 @@ data class OrderItem(
     @ManyToOne
     @JoinColumn(name = "cart_id", nullable = true)
     var cart: Cart? = null,
-
-    @OneToOne(mappedBy = "orderItem", cascade = [CascadeType.ALL])
-    var review: Review? = null
 )
