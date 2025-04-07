@@ -1,7 +1,5 @@
 package com.example.admp_api_flora_mart.dto
 
-import com.fasterxml.jackson.annotation.JsonInclude
-
 data class OrderItemDTO(
     var id: Long? = null,
     var product: ProductDTO?= null,

@@ -31,4 +31,13 @@ class ProductServiceImpl(
         val products = productRepository.findAll();
         return products.map { productMapper.toDto(it) }
     }
+
+    override fun findTop10SimilarProducts(id: Long): List<ProductDTO> {
+        val products = productRepository.findTop10SimilarProducts(id);
+        return products.map { productMapper.toDto(it) }
+    }
+
+    override fun getProductsByIds(ids: List<Long>): List<ProductDTO> {
+        return productRepository.findAllById(ids).map { productMapper.toDto(it) }
+    }
 }
