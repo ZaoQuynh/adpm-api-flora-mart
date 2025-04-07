@@ -3,6 +3,7 @@ package com.example.admp_api_flora_mart.service.impl
 import com.example.admp_api_flora_mart.controller.orderItem.request.AddToCartRequest
 import com.example.admp_api_flora_mart.dto.CartDTO
 import com.example.admp_api_flora_mart.dto.OrderItemDTO
+import com.example.admp_api_flora_mart.entity.EOrderStatus
 import com.example.admp_api_flora_mart.entity.OrderItem
 import com.example.admp_api_flora_mart.mapper.OrderItemMapper
 import com.example.admp_api_flora_mart.reponsitory.CartRepository
@@ -37,6 +38,16 @@ class OrderItemServiceImpl(
         orderItem.cart?.orderItems?.remove(orderItem)
         orderItemRepository.delete(orderItem)
     }
+
+    override fun soldQtyByProductId(id: Long?): Int {
+        if (id == null) return 0
+        val orderItems = orderItemRepository.findByProductId(id)
+        val completedOrderItems = orderItems.filter { orderItem ->
+            orderItem.order?.status == EOrderStatus.DELIVERED
+        }
+        return completedOrderItems.sumOf { it.qty ?: 0 }
+    }
+
 
     @Transactional
     override fun addToCart(request: AddToCartRequest): OrderItemDTO {
