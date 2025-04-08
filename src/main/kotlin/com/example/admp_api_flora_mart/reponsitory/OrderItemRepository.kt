@@ -11,4 +11,5 @@ interface OrderItemRepository : JpaRepository<OrderItem, Long> {
     fun findUnpaidOrderItemsByUser(userId: Long): List<OrderItem>
     @Query("SELECT oi FROM OrderItem oi WHERE oi.order.customer.id = :userId AND oi.product.id = :productId AND (oi.order.payment IS NULL OR oi.order.payment.type IS NULL)")
     fun findByOrderCustomerAndProduct(userId: Long, productId: Long): OrderItem?
+    fun findByProductId(productId: Long): List<OrderItem>
 }

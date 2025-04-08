@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/v1/product")
 class ProductController(private val productService: ProductService) {
     @GetMapping
-    fun getProducts(): ResponseEntity<Any>{
+    fun getProducts(): ResponseEntity<Any> {
         return try {
             val products = productService.getProducts();
             ResponseEntity.ok(products)
-        } catch (ex: Exception){
+        } catch (ex: Exception) {
             ResponseEntity.badRequest().body(mapOf("error" to ex.message))
         }
     }
@@ -23,8 +23,30 @@ class ProductController(private val productService: ProductService) {
         return try {
             val newProduct = productService.add(product)
             ResponseEntity.ok(newProduct)
-        } catch (ex: Exception){
+        } catch (ex: Exception) {
             ResponseEntity.badRequest().body(mapOf("error" to ex.message))
         }
     }
+
+    @GetMapping("/similar/{id}")
+    fun findTop10SimilarProducts(@PathVariable id: Long): ResponseEntity<Any> {
+        return try {
+            val products = productService.findTop10SimilarProducts(id);
+            ResponseEntity.ok(products)
+        } catch (ex: Exception) {
+            ResponseEntity.badRequest().body(mapOf("error" to ex.message))
+        }
+    }
+
+    @PostMapping("/get-by-ids")
+    fun getProductByIds(@RequestBody request: Map<String, List<Long>>): ResponseEntity<Any> {
+        return try {
+            val ids = request["ids"] ?: emptyList()
+            val products = productService.getProductsByIds(ids)
+            ResponseEntity.ok(products)
+        } catch (ex: Exception) {
+            ResponseEntity.badRequest().body(mapOf("error" to ex.message))
+        }
+    }
+
 }

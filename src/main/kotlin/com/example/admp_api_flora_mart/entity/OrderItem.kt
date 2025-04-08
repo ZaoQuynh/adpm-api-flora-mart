@@ -15,6 +15,9 @@ data class OrderItem(
     var qty: Int?= 0,
     var currentPrice: Double?= 0.0,
 
+    @OneToOne(mappedBy = "orderItem", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    var review: Review? = null,
+
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = true)
     var order: Order? = null,
@@ -22,7 +25,4 @@ data class OrderItem(
     @ManyToOne
     @JoinColumn(name = "cart_id", nullable = true)
     var cart: Cart? = null,
-
-    @OneToOne(mappedBy = "orderItem", cascade = [CascadeType.ALL])
-    var review: Review? = null
 )
