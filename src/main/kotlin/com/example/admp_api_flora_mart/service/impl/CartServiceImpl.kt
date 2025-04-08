@@ -23,7 +23,8 @@ class CartServiceImpl(
     private val cartMapper: CartMapper,
     private val orderItemRepository: OrderItemRepository,
     private val orderRepository: OrderRepository,
-    private val paymentRepository: PaymentRepository
+    private val paymentRepository: PaymentRepository,
+    private val voucherRepository: VoucherRepository
 ): CartService {
 
     override fun getCartByUser(email: String): CartDTO {
@@ -57,6 +58,13 @@ class CartServiceImpl(
     }
 
     override fun checkOut(request: CheckoutRequest): CartDTO {
+        val vouchers = if (request.voucherId != 0L) {
+            val voucher = voucherRepository.findById(request.voucherId)
+                .orElseThrow { RuntimeException("Voucher not found") }
+            mutableListOf(voucher)
+        } else {
+            mutableListOf()
+        }
         val cart = request.cartDTO.id
             ?.let { cartRepository.findById(it).orElseThrow { RuntimeException("Cart not found") } }
             ?: throw RuntimeException("Cart ID is null")
@@ -77,15 +85,13 @@ class CartServiceImpl(
             customer = cart.customer,
             status = EOrderStatus.NEW,
             createDate = LocalDateTime.now(),
-            vouchers = mutableListOf(),
+            vouchers = vouchers,
             payment = payment,
             address = request.address
         )
 
-        // Lưu Order mới vào database để có ID
         val savedOrder = orderRepository.save(newOrder)
 
-        // Chuyển tất cả OrderItem từ Cart sang Order mới tạo
         validOrderItems.forEach { orderItem ->
             orderItem.order = savedOrder
             orderItem.cart = null
