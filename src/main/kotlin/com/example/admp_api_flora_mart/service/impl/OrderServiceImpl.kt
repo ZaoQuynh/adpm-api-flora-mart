@@ -6,23 +6,26 @@ import com.example.admp_api_flora_mart.entity.Order
 import com.example.admp_api_flora_mart.mapper.*
 import com.example.admp_api_flora_mart.reponsitory.OrderRepository
 import com.example.admp_api_flora_mart.reponsitory.UserRepository
+import com.example.admp_api_flora_mart.reponsitory.VoucherRepository
 import com.example.admp_api_flora_mart.scheduler.order.OrderSchedulerService
 import com.example.admp_api_flora_mart.service.OrderService
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
-import javax.naming.AuthenticationException
 
 @Service
-class OrderServiceImpl(private val orderRepository: OrderRepository,
+class OrderServiceImpl(
+    private val orderRepository: OrderRepository,
     private val orderMapper: OrderMapper,
     private val orderItemMapper: OrderItemMapper,
     private val userRepository: UserRepository,
     private val userMapper: UserMapper,
     private val voucherMapper: VoucherMapper,
     private val paymentMapper: PaymentMapper,
-    private val orderSchedulerService: OrderSchedulerService): OrderService {
+    private val orderSchedulerService: OrderSchedulerService,
+    private val voucherRepository: VoucherRepository
+): OrderService {
 
 
     override fun getOrders(): List<OrderDTO> {
@@ -32,11 +35,12 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
 
 
     override fun add(orderDTO: OrderDTO): OrderDTO {
+        val voucher = voucherRepository.findById(1).orElseThrow()
         val order = Order(
             customer = orderDTO.customer?.let { userMapper.toEntity(it) },
             status = EOrderStatus.NEW,
             createDate = LocalDateTime.now(),
-            vouchers = orderDTO.vouchers.map { voucherMapper.toEntity(it) }.toMutableList(),
+            vouchers =  mutableListOf(voucher),
             payment = orderDTO.payment?.let { paymentMapper.toEntity(it) },
             address = orderDTO.address
         )
