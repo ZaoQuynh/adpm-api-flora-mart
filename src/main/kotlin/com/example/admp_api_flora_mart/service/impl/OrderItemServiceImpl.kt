@@ -65,7 +65,6 @@ class OrderItemServiceImpl(
         return if (existingOrderItem != null) {
             existingOrderItem.qty = (existingOrderItem.qty ?: 0) + 1
             existingOrderItem.currentPrice = product.price
-            existingOrderItem.discounted = product.discount
 
             val updatedOrderItem = orderItemRepository.save(existingOrderItem)
 
