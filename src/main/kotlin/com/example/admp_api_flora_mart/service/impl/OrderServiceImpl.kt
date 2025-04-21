@@ -1,5 +1,7 @@
 package com.example.admp_api_flora_mart.service.impl
 
+import com.example.admp_api_flora_mart.controller.order.response.CashflowStats
+import com.example.admp_api_flora_mart.controller.order.response.MyOrderResponse
 import com.example.admp_api_flora_mart.dto.OrderDTO
 import com.example.admp_api_flora_mart.entity.EOrderStatus
 import com.example.admp_api_flora_mart.entity.Order
@@ -115,5 +117,42 @@ class OrderServiceImpl(
             orderSchedulerService.scheduleOrderStatusUpdate(orderId, updateTime)
         } ?: throw IllegalArgumentException("Order ID not null")
     }
+    override fun calculateCashflowByUser(email: String): MyOrderResponse {
+        val user = userRepository.findByEmail(email)
+            .orElseThrow { Exception("User not found for email: $email.") }
+        val orders = orderRepository.findAllByCustomer(user).map { orderMapper.toDto(it) }
 
+        // Group by year
+        val cashflowStatsByYear = mutableMapOf<Int, CashflowStats>()
+
+        orders.forEach { order ->
+            val itemTotal = order.orderItems.sumOf { (it.qty ?: 0) * (it.discounted ?: 0.0) }
+            val voucher = order.vouchers.firstOrNull()
+
+            val finalAmount = if (voucher != null && itemTotal >= voucher.minOrderAmount!!) {
+                val discountAmount = itemTotal * (voucher.discount!!)/100
+                val cappedDiscount = if (voucher.maxDiscount != null) discountAmount.coerceAtMost(voucher.maxDiscount!!) else discountAmount
+                itemTotal - cappedDiscount
+            } else {
+                itemTotal
+            }
+
+            val year = order.createDate?.year ?: 0  // Giả sử order có trường createdAt là Date, lấy năm từ đó
+            val stats = cashflowStatsByYear.getOrPut(year) {
+                CashflowStats(year, 0.0, 0.0, 0.0) // Tạo một CashflowStats mới cho năm này nếu chưa có
+            }
+
+            when (order.status) {
+                EOrderStatus.NEW -> stats.pendingAmount += finalAmount
+                EOrderStatus.SHIPPING -> stats.shippingAmount += finalAmount
+                EOrderStatus.DELIVERED -> stats.deliveredAmount += finalAmount
+                else -> {}
+            }
+        }
+
+        return MyOrderResponse(
+            orders = orders,
+            statsByYear = cashflowStatsByYear.values.toList() // Chuyển đổi map thành list
+        )
+    }
 }

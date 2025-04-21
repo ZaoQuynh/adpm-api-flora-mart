@@ -79,7 +79,7 @@ class OrderItemServiceImpl(
         } else {
             val newOrderItem = OrderItem(
                 product = product,
-                discounted = product.discount,
+                discounted = product.price!! - (product.price!!) * (product.discount!!) * 0.01,
                 qty = 1,
                 currentPrice = product.price,
                 cart = cart
