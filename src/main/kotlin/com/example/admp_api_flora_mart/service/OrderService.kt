@@ -1,5 +1,7 @@
 package com.example.admp_api_flora_mart.service
 
+import com.example.admp_api_flora_mart.controller.order.response.CashflowStats
+import com.example.admp_api_flora_mart.controller.order.response.MyOrderResponse
 import com.example.admp_api_flora_mart.dto.OrderDTO
 
 interface OrderService {
@@ -10,4 +12,5 @@ interface OrderService {
     fun cancel(orderId: Long): OrderDTO
     fun receive(orderId: Long): OrderDTO
     fun getById(orderId: Long): OrderDTO
+    fun calculateCashflowByUser(email: String): MyOrderResponse
 }

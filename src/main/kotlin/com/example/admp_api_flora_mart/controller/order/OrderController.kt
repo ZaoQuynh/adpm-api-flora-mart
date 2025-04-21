@@ -1,5 +1,7 @@
 package com.example.admp_api_flora_mart.controller.order
 
+import com.example.admp_api_flora_mart.controller.order.response.CashflowStats
+import com.example.admp_api_flora_mart.controller.order.response.MyOrderResponse
 import com.example.admp_api_flora_mart.dto.OrderDTO
 import com.example.admp_api_flora_mart.service.OrderService
 import com.example.admp_api_flora_mart.service.TokenService
@@ -44,6 +46,23 @@ class OrderController(private val orderService: OrderService,
             val orders = orderService.getOrdersByUser(email)
             return ResponseEntity.ok(orders)
         } catch (ex: Exception){
+            ResponseEntity.badRequest().body(mapOf("error" to ex.message))
+        }
+    }
+
+    @GetMapping("/my-order-flow-stats")
+    fun getMyOrderFlowStats(@RequestHeader("Authorization") token: String): ResponseEntity<Any> {
+        return try {
+            val jwt = token.removePrefix("Bearer ")
+            val email = tokenService.extractEmail(jwt)
+            if (email == null) {
+                return ResponseEntity.status(401).body(mapOf("error" to "Invalid token"))
+            }
+
+            val response = orderService.calculateCashflowByUser(email)
+
+            return ResponseEntity.ok(response)
+        } catch (ex: Exception) {
             ResponseEntity.badRequest().body(mapOf("error" to ex.message))
         }
     }

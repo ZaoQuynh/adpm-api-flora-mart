@@ -40,6 +40,17 @@ class CartController(
             ResponseEntity.badRequest().body(mapOf("error" to ex.message))
         }
     }
+
+    @PostMapping("my-cart-id")
+    fun getCartId(@RequestBody userId: Long): ResponseEntity<Any> {
+        return try {
+            val newCart = cartService.getCartIdByUserId(userId)
+            ResponseEntity.ok(newCart)
+        } catch (ex: Exception){
+            ResponseEntity.badRequest().body(mapOf("error" to ex.message))
+        }
+    }
+
     @PostMapping("/check-out")
     fun checkOut(@RequestBody request: CheckoutRequest): ResponseEntity<Any>{
         return try {

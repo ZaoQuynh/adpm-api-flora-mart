@@ -118,4 +118,9 @@ class CartServiceImpl(
         val updatedCart = cartRepository.save(cart)
         return cartMapper.toDto(updatedCart)
     }
+
+    override fun getCartIdByUserId(userId: Long): Long {
+        return cartRepository.findCartIdByUserId(userId)
+            .orElseThrow { NoSuchElementException("Cart not found for userId: $userId") }
+    }
 }
