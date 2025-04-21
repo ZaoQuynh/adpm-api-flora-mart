@@ -9,4 +9,5 @@ interface CartService {
     fun getCartByUser(email: String): CartDTO
     fun checkOut(request: CheckoutRequest): CartDTO
     fun updateQuantity(request: UpdateCartQuantityRequest): CartDTO
+    fun getCartIdByUserId(userId: Long): Long
 }
