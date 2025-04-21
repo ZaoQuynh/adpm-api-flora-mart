@@ -48,6 +48,9 @@ dependencies {
 
 	//Quartz
 	implementation("org.springframework.boot:spring-boot-starter-quartz")
+
+	// Websocket
+	implementation("org.springframework.boot:spring-boot-starter-websocket")
 }
 
 kotlin {
