@@ -19,9 +19,9 @@ data class Notification(
 
     var date: LocalDateTime?= LocalDateTime.now(),
 
-    @ElementCollection(fetch = FetchType.LAZY) // Add this annotation
-    @MapKeyColumn(name = "param_key") // This specifies the column for keys
-    @Column(name = "param_value") // This specifies the column for values
+    @ElementCollection(fetch = FetchType.LAZY)
+    @MapKeyColumn(name = "param_key")
+    @Column(name = "param_value")
     @CollectionTable(name = "notification_params", joinColumns = [JoinColumn(name = "notification_id")]) // This specifies the table that will hold the map
     var params: Map<String, String>? = null,
 
@@ -31,5 +31,5 @@ data class Notification(
 )
 
 enum class ENotificationType {
-    ORDER, POST, EVENT, REVIEW, COMMENT
+    ORDER, POST, EVENT, REVIEW, COMMENT, FEEDBACK
 }

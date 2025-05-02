@@ -10,7 +10,9 @@ import com.example.admp_api_flora_mart.reponsitory.OrderRepository
 import com.example.admp_api_flora_mart.reponsitory.UserRepository
 import com.example.admp_api_flora_mart.reponsitory.VoucherRepository
 import com.example.admp_api_flora_mart.scheduler.order.OrderSchedulerService
+import com.example.admp_api_flora_mart.service.NotificationService
 import com.example.admp_api_flora_mart.service.OrderService
+import com.example.admp_api_flora_mart.utils.NotificationUtils
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -26,7 +28,8 @@ class OrderServiceImpl(
     private val voucherMapper: VoucherMapper,
     private val paymentMapper: PaymentMapper,
     private val orderSchedulerService: OrderSchedulerService,
-    private val voucherRepository: VoucherRepository
+    private val voucherRepository: VoucherRepository,
+    private val notificationSevice: NotificationService
 ): OrderService {
 
 
@@ -69,8 +72,17 @@ class OrderServiceImpl(
     }
 
     override fun updateOrderStatus(orderId: Long): OrderDTO {
-        val order = orderRepository.findById(orderId).orElse(null)
-        order.status = EOrderStatus.CONFIRMED
+        val order = orderRepository.findById(orderId).orElseThrow {
+            IllegalArgumentException("Order with ID $orderId not found")
+        }
+        val status = order.status;
+        when(status){
+            EOrderStatus.NEW -> order.status = EOrderStatus.CONFIRMED
+            EOrderStatus.CONFIRMED -> order.status = EOrderStatus.PREPARING
+            EOrderStatus.PREPARING -> order.status = EOrderStatus.SHIPPING
+            EOrderStatus.SHIPPING -> order.status = EOrderStatus.SHIPPED
+            else -> throw IllegalStateException("Cannot update status from ${order.status}")
+        }
         return orderMapper.toDto(orderRepository.save(order))
     }
 
@@ -84,7 +96,13 @@ class OrderServiceImpl(
 
         order.status = EOrderStatus.CANCELED
         order.id?.let { orderSchedulerService.cancelScheduledOrderUpdate(it) }
-        return orderMapper.toDto(orderRepository.save(order))
+        val savedOrder = orderMapper.toDto(orderRepository.save(order))
+        val message = NotificationUtils.createOrderNotification(savedOrder.status!!, savedOrder.customer!!,
+            savedOrder.id!!
+        )
+        if(message != null)
+            savedOrder.customer!!.id?.let { notificationSevice.sendToUser(it, message) };
+        return savedOrder
     }
 
     override fun receive(orderId: Long): OrderDTO {
@@ -96,7 +114,14 @@ class OrderServiceImpl(
         }
 
         order.status = EOrderStatus.DELIVERED
-        return orderMapper.toDto(orderRepository.save(order))
+
+        val savedOrder = orderMapper.toDto(orderRepository.save(order))
+        val message = NotificationUtils.createOrderNotification(savedOrder.status!!, savedOrder.customer!!,
+            savedOrder.id!!
+        )
+        if(message != null)
+            savedOrder.customer!!.id?.let { notificationSevice.sendToUser(it, message) };
+        return savedOrder
     }
 
     override fun getById(orderId: Long): OrderDTO {
@@ -108,7 +133,7 @@ class OrderServiceImpl(
             ?: throw IllegalArgumentException("createDate not null")
 
         val updateTime = Date.from(
-            createDate.plusMinutes(30)
+            createDate.plusMinutes(1)
                 .atZone(ZoneId.systemDefault())
                 .toInstant()
         )

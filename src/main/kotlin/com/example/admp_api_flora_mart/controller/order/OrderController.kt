@@ -96,4 +96,14 @@ class OrderController(private val orderService: OrderService,
             ResponseEntity.badRequest().body(mapOf("error" to ex.message))
         }
     }
+
+    @PatchMapping("/status/{orderId}")
+    fun updateOrderStatus(@PathVariable orderId: Long): ResponseEntity<Any> {
+        return try {
+            val receivedOrder = orderService.updateOrderStatus(orderId)
+            ResponseEntity.ok(receivedOrder)
+        } catch (ex: Exception){
+            ResponseEntity.badRequest().body(mapOf("error" to ex.message))
+        }
+    }
 }
