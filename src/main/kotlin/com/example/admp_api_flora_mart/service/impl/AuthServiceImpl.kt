@@ -118,7 +118,7 @@ class AuthServiceImpl(
             tier = EUserTier.BRONZE,
             points = 0,
             status = EUserStatus.PENDING,
-            role = ERole.CUSTOMER
+            role = registerRequest.role
         )
 
         val savedUser = userRepository.save(user)

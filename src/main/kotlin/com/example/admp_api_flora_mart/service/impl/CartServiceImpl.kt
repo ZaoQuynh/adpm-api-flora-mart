@@ -6,12 +6,19 @@ import com.example.admp_api_flora_mart.dto.CartDTO
 import com.example.admp_api_flora_mart.entity.*
 import com.example.admp_api_flora_mart.mapper.CartMapper
 import com.example.admp_api_flora_mart.mapper.OrderItemMapper
+import com.example.admp_api_flora_mart.mapper.OrderMapper
 import com.example.admp_api_flora_mart.mapper.UserMapper
 import com.example.admp_api_flora_mart.reponsitory.*
+import com.example.admp_api_flora_mart.scheduler.order.OrderSchedulerService
 import com.example.admp_api_flora_mart.service.CartService
+import com.example.admp_api_flora_mart.service.NotificationService
+import com.example.admp_api_flora_mart.utils.NotificationUtils
 
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.util.*
+import kotlin.NoSuchElementException
 
 
 @Service
@@ -24,7 +31,10 @@ class CartServiceImpl(
     private val orderItemRepository: OrderItemRepository,
     private val orderRepository: OrderRepository,
     private val paymentRepository: PaymentRepository,
-    private val voucherRepository: VoucherRepository
+    private val voucherRepository: VoucherRepository,
+    private val notificationService: NotificationService,
+    private val orderMapper: OrderMapper,
+    private val orderSchedulerService: OrderSchedulerService
 ): CartService {
 
     override fun getCartByUser(email: String): CartDTO {
@@ -97,7 +107,14 @@ class CartServiceImpl(
             orderItem.cart = null
         }
         orderItemRepository.saveAll(validOrderItems)
+        val saveOrderDTO = orderMapper.toDto(savedOrder)
+        val message = NotificationUtils.createOrderNotification(saveOrderDTO.status!!,
+            saveOrderDTO.customer!!, saveOrderDTO.id!!
+        )
 
+        scheduleOrderUpdates(savedOrder)
+        if(message != null)
+            saveOrderDTO.customer!!.id?.let { notificationService.sendToUser(it, message) }
         return request.cartDTO
     }
 
@@ -122,5 +139,20 @@ class CartServiceImpl(
     override fun getCartIdByUserId(userId: Long): Long {
         return cartRepository.findCartIdByUserId(userId)
             .orElseThrow { NoSuchElementException("Cart not found for userId: $userId") }
+    }
+
+    fun scheduleOrderUpdates(order: Order) {
+        val createDate = order.createDate
+            ?: throw IllegalArgumentException("createDate not null")
+
+        val updateTime = Date.from(
+            createDate.plusMinutes(1)
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+        )
+
+        order.id?.let { orderId ->
+            orderSchedulerService.scheduleOrderStatusUpdate(orderId, updateTime)
+        } ?: throw IllegalArgumentException("Order ID not null")
     }
 }
