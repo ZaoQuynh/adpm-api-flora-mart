@@ -19,6 +19,7 @@ interface ProductRepository: JpaRepository<Product, Long> {
             )
         )
         AND pr.id <> :productId
+        AND pr.is_deleted = false
         GROUP BY pr.id
         ORDER BY COUNT(pa.attribute_id) DESC
         LIMIT 10
@@ -26,5 +27,7 @@ interface ProductRepository: JpaRepository<Product, Long> {
         nativeQuery = true
     )
     fun findTop10SimilarProducts(@Param("productId") productId: Long): List<Product>
+
+    fun findAllByIsDeletedFalse(): List<Product>
 
 }

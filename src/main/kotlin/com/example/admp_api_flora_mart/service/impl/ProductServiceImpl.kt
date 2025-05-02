@@ -28,7 +28,7 @@ class ProductServiceImpl(
     }
 
     override fun getProducts(): List<ProductDTO> {
-        val products = productRepository.findAll();
+        val products = productRepository.findAllByIsDeletedFalse();
         return products.map { productMapper.toDto(it) }
     }
 
@@ -39,5 +39,31 @@ class ProductServiceImpl(
 
     override fun getProductsByIds(ids: List<Long>): List<ProductDTO> {
         return productRepository.findAllById(ids).map { productMapper.toDto(it) }
+    }
+
+    override fun update(id: Long, updatedProduct: ProductDTO): ProductDTO {
+        val existingProduct = productRepository.findById(id)
+            .orElseThrow { IllegalArgumentException("Product with ID $id not found") }
+
+        existingProduct.apply {
+            plant = updatedProduct.plant?.let { plantMapper.toEntity(it) } ?: plant
+            price = updatedProduct.price ?: price
+            discount = updatedProduct.discount ?: discount
+            stockQty = updatedProduct.stockQty ?: stockQty
+            isDeleted = updatedProduct.isDeleted ?: isDeleted
+        }
+
+        val updatedProduct = productRepository.save(existingProduct)
+        return productMapper.toDto(updatedProduct)
+    }
+
+    override fun delete(id: Long): ProductDTO {
+        val existingProduct = productRepository.findById(id)
+            .orElseThrow { IllegalArgumentException("Product with ID $id not found") }
+
+        existingProduct.isDeleted = true
+
+        val deletedProduct = productRepository.save(existingProduct)
+        return productMapper.toDto(deletedProduct)
     }
 }

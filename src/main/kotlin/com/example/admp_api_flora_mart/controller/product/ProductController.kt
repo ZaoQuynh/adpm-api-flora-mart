@@ -49,4 +49,26 @@ class ProductController(private val productService: ProductService) {
         }
     }
 
+    @PutMapping("/{id}")
+    fun updateProduct(
+        @PathVariable id: Long,
+        @RequestBody updatedProduct: ProductDTO
+    ): ResponseEntity<Any> {
+        return try {
+            val result = productService.update(id, updatedProduct)
+            ResponseEntity.ok(result)
+        } catch (ex: Exception) {
+            ResponseEntity.badRequest().body(mapOf("error" to ex.message))
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteProduct(@PathVariable id: Long): ResponseEntity<Any> {
+        return try {
+            val result = productService.delete(id)
+            ResponseEntity.ok(mapOf("success" to true, "message" to "Product deleted successfully", "data" to result))
+        } catch (ex: Exception) {
+            ResponseEntity.badRequest().body(mapOf("error" to ex.message))
+        }
+    }
 }
