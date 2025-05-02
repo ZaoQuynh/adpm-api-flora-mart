@@ -27,4 +27,17 @@ class PlantServiceImpl(private val plantRepository: PlantRepository,
         val savedPlant = plantRepository.save(plant)
         return plantMapper.toDto(savedPlant)
     }
+
+    override fun update(id: Long, plantDTO: PlantDTO): PlantDTO {
+        val existingPlant = plantRepository.findById(id)
+            .orElseThrow { IllegalArgumentException("Plant with id $id not found") }
+
+        existingPlant.name = plantDTO.name
+        existingPlant.img = plantDTO.img
+        existingPlant.descriptions = plantDTO.descriptions.map { descriptionMapper.toEntity(it) }.toMutableList()
+        existingPlant.attributes = plantDTO.attributes.map { attributeMapper.toEntity(it) }.toMutableList()
+
+        val updatedPlant = plantRepository.save(existingPlant)
+        return plantMapper.toDto(updatedPlant)
+    }
 }

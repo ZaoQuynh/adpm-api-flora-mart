@@ -7,4 +7,6 @@ interface ProductService {
     fun getProducts(): List<ProductDTO>
     fun findTop10SimilarProducts(id: Long): List<ProductDTO>
     fun getProductsByIds(ids: List<Long>): List<ProductDTO>
+    fun update(id: Long, updatedProduct: ProductDTO): ProductDTO
+    abstract fun delete(id: Long): ProductDTO
 }
