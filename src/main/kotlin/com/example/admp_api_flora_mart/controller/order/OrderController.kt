@@ -2,6 +2,7 @@ package com.example.admp_api_flora_mart.controller.order
 
 import com.example.admp_api_flora_mart.controller.order.response.CashflowStats
 import com.example.admp_api_flora_mart.controller.order.response.MyOrderResponse
+import com.example.admp_api_flora_mart.controller.order.response.RevenueByYearResponse
 import com.example.admp_api_flora_mart.dto.OrderDTO
 import com.example.admp_api_flora_mart.service.OrderService
 import com.example.admp_api_flora_mart.service.TokenService
@@ -105,5 +106,11 @@ class OrderController(private val orderService: OrderService,
         } catch (ex: Exception){
             ResponseEntity.badRequest().body(mapOf("error" to ex.message))
         }
+    }
+
+    @GetMapping("/admin/revenue-by-year")
+    fun getRevenueByYear(): ResponseEntity<RevenueByYearResponse> {
+        val response = orderService.calculateRevenueByYear()
+        return ResponseEntity.ok(response)
     }
 }

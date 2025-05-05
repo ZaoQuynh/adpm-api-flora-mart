@@ -11,5 +11,6 @@ data class OrderDTO (
     var createDate: LocalDateTime?= null,
     var vouchers: MutableList<VoucherDTO> = mutableListOf(),
     var payment: PaymentDTO?= null,
-    var address: String?= null
+    var address: String?= null,
+    var phone: String?= null
 )
