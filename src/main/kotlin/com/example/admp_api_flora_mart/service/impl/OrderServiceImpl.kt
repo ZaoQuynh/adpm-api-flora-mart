@@ -2,6 +2,7 @@ package com.example.admp_api_flora_mart.service.impl
 
 import com.example.admp_api_flora_mart.controller.order.response.CashflowStats
 import com.example.admp_api_flora_mart.controller.order.response.MyOrderResponse
+import com.example.admp_api_flora_mart.controller.order.response.RevenueByYearResponse
 import com.example.admp_api_flora_mart.dto.OrderDTO
 import com.example.admp_api_flora_mart.entity.EOrderStatus
 import com.example.admp_api_flora_mart.entity.Order
@@ -47,7 +48,8 @@ class OrderServiceImpl(
             createDate = LocalDateTime.now(),
             vouchers =  mutableListOf(voucher),
             payment = orderDTO.payment?.let { paymentMapper.toEntity(it) },
-            address = orderDTO.address
+            address = orderDTO.address,
+            phone = orderDTO.phone
         )
         val savedOrder = orderRepository.save(order)
 
@@ -179,5 +181,37 @@ class OrderServiceImpl(
             orders = orders,
             statsByYear = cashflowStatsByYear.values.toList() // Chuyển đổi map thành list
         )
+    }
+
+    override fun calculateRevenueByYear(): RevenueByYearResponse {
+        val orders = orderRepository.findAll().map { orderMapper.toDto(it) }
+
+        // Dữ liệu kết quả: Map<Year, List<12 tháng doanh thu>>
+        val revenueMap = mutableMapOf<Int, MutableList<Double>>()
+
+        orders.forEach { order ->
+            val createdAt = order.createDate ?: return@forEach
+            val year = createdAt.year
+            val month = createdAt.monthValue - 1 // từ 0 đến 11
+
+            val itemTotal = order.orderItems.sumOf { (it.qty ?: 0) * (it.discounted ?: 0.0) }
+            val voucher = order.vouchers.firstOrNull()
+
+            val finalAmount = if (voucher != null && itemTotal >= voucher.minOrderAmount!!) {
+                val discountAmount = itemTotal * (voucher.discount!!)/100
+                val cappedDiscount = if (voucher.maxDiscount != null) discountAmount.coerceAtMost(voucher.maxDiscount!!) else discountAmount
+                itemTotal - cappedDiscount
+            } else {
+                itemTotal
+            }
+
+            // Chỉ tính những đơn đã giao thành công
+            if (order.status == EOrderStatus.DELIVERED) {
+                val monthRevenue = revenueMap.getOrPut(year) { MutableList(12) { 0.0 } }
+                monthRevenue[month] += finalAmount/1000
+            }
+        }
+
+        return RevenueByYearResponse(revenueDataByYear = revenueMap)
     }
 }

@@ -29,7 +29,8 @@ data class Order (
     @ManyToOne
     @JoinColumn(name = "payment_id", nullable = true)
     var payment: Payment?= null,
-    var address: String?= null
+    var address: String?= null,
+    var phone: String?= null
 )
 
 enum class EOrderStatus{

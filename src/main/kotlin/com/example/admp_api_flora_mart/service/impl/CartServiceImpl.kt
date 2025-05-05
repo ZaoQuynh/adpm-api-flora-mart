@@ -97,7 +97,8 @@ class CartServiceImpl(
             createDate = LocalDateTime.now(),
             vouchers = vouchers,
             payment = payment,
-            address = request.address
+            address = request.address,
+            phone = request.phone
         )
 
         val savedOrder = orderRepository.save(newOrder)

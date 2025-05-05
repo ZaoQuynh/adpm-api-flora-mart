@@ -8,5 +8,6 @@ data class CheckoutRequest(
     val cartDTO: CartDTO,
     val address: String,
     val type: EPaymentType,
-    val voucherId: Long
+    val voucherId: Long,
+    val phone: String
 )
