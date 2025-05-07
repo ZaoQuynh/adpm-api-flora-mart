@@ -26,4 +26,9 @@ class AttributeGroupServiceImpl(
         val savedAttributeGroup = attributeGroupRepository.save(attributeGroup)
         return attributeGroupMapper.toDto(savedAttributeGroup)
     }
+
+    override fun getAttributeGroups(): List<AttributeGroupDTO> {
+        val attributes = attributeGroupRepository.findAll();
+        return attributes.map { attributeGroupMapper.toDto(it) }
+    }
 }

@@ -14,9 +14,15 @@ data class OrderItem(
     var discounted: Double?= 0.0,
     var qty: Int?= 0,
     var currentPrice: Double?= 0.0,
-    var isReviewed: Boolean,
+
+    @OneToOne(mappedBy = "orderItem", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    var review: Review? = null,
 
     @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "order_id", nullable = true)
     var order: Order? = null,
+
+    @ManyToOne
+    @JoinColumn(name = "cart_id", nullable = true)
+    var cart: Cart? = null,
 )

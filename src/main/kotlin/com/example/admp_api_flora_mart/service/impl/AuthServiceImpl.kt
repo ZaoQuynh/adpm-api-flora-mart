@@ -97,8 +97,6 @@ class AuthServiceImpl(
         val user = userRepository.findByEmail(email)
             .orElseThrow { AuthenticationException("User not found for email: $email.") }
 
-        println("User found: $user")
-
         user.password = passwordEncoder.encode(newPassword)
         val verifiedUser = userRepository.save(user)
         return userMapper.toDto(verifiedUser)
@@ -112,12 +110,13 @@ class AuthServiceImpl(
         val user = User(
             fullName = registerRequest.fullName,
             email = registerRequest.email,
+            phoneNumber = registerRequest.phoneNumber,
             username = registerRequest.username,
             password = passwordEncoder.encode(registerRequest.password),
             tier = EUserTier.BRONZE,
             points = 0,
             status = EUserStatus.PENDING,
-            role = ERole.CUSTOMER
+            role = registerRequest.role?: ERole.CUSTOMER
         )
 
         val savedUser = userRepository.save(user)

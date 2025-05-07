@@ -15,8 +15,6 @@ data class Product(
     var price: Double?= 0.0,
     var discount: Double?= 0.0,
     var stockQty: Int?= 0,
-    @OneToMany(mappedBy = "product", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    var reviews: MutableList<Review> = mutableListOf(),
 
     var isDeleted: Boolean? = false
 )

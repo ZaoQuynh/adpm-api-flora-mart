@@ -23,7 +23,16 @@ data class User(
 
 
     @OneToMany(mappedBy = "customer", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    var reviews: MutableList<Review> = mutableListOf()
+    var reviews: MutableList<Review> = mutableListOf(),
+
+    @ManyToMany
+    @JoinTable(
+        name = "favorites",
+        joinColumns = [JoinColumn(name = "user_id")],
+        inverseJoinColumns = [JoinColumn(name = "product_id")]
+    )
+    var favoriteProducts: MutableList<Product> = mutableListOf()
+
 )
 
 enum class ERole {
